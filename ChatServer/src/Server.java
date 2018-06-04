@@ -33,4 +33,8 @@ public class Server extends Thread {
             e.printStackTrace();
         }
     }
+
+    public void removeHelper(ServerHelper serverHelper) {
+        helperList.remove(serverHelper);
+    }
 }

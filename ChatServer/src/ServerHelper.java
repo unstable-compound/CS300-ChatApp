@@ -3,6 +3,7 @@ import java.net.Socket;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 public class ServerHelper extends Thread{
@@ -10,6 +11,7 @@ public class ServerHelper extends Thread{
     private final Socket clientSocket;
     private final Server server;
     private OutputStream outputStream;
+    private HashSet<String> topicSet = new HashSet<>();
 
     public String getLogin() {
         return login;
@@ -37,8 +39,22 @@ public class ServerHelper extends Thread{
                     handleLogoff();
                     break;
                 }
-                else if(clientCommand.equalsIgnoreCase("login"))
+                else if(clientCommand.equalsIgnoreCase("login")) {
                     handleLogin(outputStream, words);
+                }
+                else if(clientCommand.equalsIgnoreCase("msg")){
+                    //instead of seperating all by whitespace, only seperate the first and second whitespace.
+                    //That way, you have words[0] = 'command', words[1] = 'target_user', and words[2] = 'msg_body'.
+                    String [] messageWords = StringUtils.split(currentLine, null, 3);
+                    handleMessage(messageWords);
+                }
+                else if(clientCommand.equalsIgnoreCase("join"))
+                {
+                    handleJoin(words);
+                }
+                else if(clientCommand.equalsIgnoreCase("leave")){
+                    handleLeave(words);
+                }
                 else
                 {
                     String message = "The command: '" + clientCommand + "' is an unknown command.\n";
@@ -51,7 +67,57 @@ public class ServerHelper extends Thread{
         clientSocket.close();
     }
 
+    private void handleLeave(String[] words) {
+        if(words.length > 1)
+        {
+            String topic = words[1];
+            topicSet.remove(topic);//doesnt actually 'leave' the topic, just removes it.
+        }
+
+    }
+
+    public boolean isMemberOfTopicSet(String topic)
+    {
+        return topicSet.contains(topic);
+    }
+    private void handleJoin(String[] words) {
+        if(words.length > 1)
+        {
+            String topic = words[1];
+            topicSet.add(topic);
+
+        }
+    }
+
+    //format_1: "msg" "login" body.....
+    //format_2: "msg" "#topic" body...
+    private void handleMessage(String[] words) throws IOException {
+        String sendTo = words[1];
+        String body = words[2];
+
+        boolean isTopic = sendTo.charAt(0) == '#';
+
+
+        List<ServerHelper> helperList = server.getHelperList();
+        for(ServerHelper helper: helperList){
+            if(isTopic){
+                if(helper.isMemberOfTopicSet(sendTo)){
+                    String outMsg = "msg " + sendTo + " " + login + "  " + body + "\n";
+                    helper.send(outMsg);
+                }
+
+            }else{
+                if(sendTo.equalsIgnoreCase(helper.getLogin())){
+                    String outMsg = "msg " + login + " " + body + "\n";
+                    helper.send(outMsg);
+                }
+            }
+        }
+
+    }
+
     private void handleLogoff() throws IOException {
+        server.removeHelper(this);
 
         List<ServerHelper> helperList = server.getHelperList();
         //send other online users current users status.
@@ -68,7 +134,7 @@ public class ServerHelper extends Thread{
         if(words.length == 3) {
             String new_login = words[1];
             String password = words[2];
-            if(new_login.equalsIgnoreCase("guest") && password.equalsIgnoreCase("guest"))
+            if((new_login.equals("guest") && password.equals("guest")) || new_login.equals("curtis") && password.equals("curtis"))
             {
                 String msg = "You are logged in.\n";
                 outputStream.write(msg.getBytes());
@@ -82,7 +148,7 @@ public class ServerHelper extends Thread{
                 for(ServerHelper helper: helperList){
                     if(helper.getLogin() != null) {
                         if(!login.equals(helper.getLogin())) {
-                            String onlineMessage = "Online: " + helper.getLogin() + "\n";
+                            String onlineMessage = "Online " + helper.getLogin() + "\n";
                             send(onlineMessage);
                         }
                     }
@@ -99,6 +165,7 @@ public class ServerHelper extends Thread{
             else{
                 String msg = "Error logging in.\n";
                 outputStream.write(msg.getBytes());
+                System.err.println("Login failed for: " + login);
             }
         }
     }
