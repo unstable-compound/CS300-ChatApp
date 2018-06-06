@@ -11,6 +11,7 @@ public class ServerHelper extends Thread{
 
     private final Socket clientSocket;
     private final Server server;
+    private AccountManager accountManager;
     private OutputStream outputStream;
     private HashSet<String> topicSet = new HashSet<>();
 
@@ -25,6 +26,7 @@ public class ServerHelper extends Thread{
     public ServerHelper(Server server, Socket clientSocket) {
         this.server = server;
         this.clientSocket = clientSocket;
+        accountManager = null;
     }
 
     private void clientSocketHandler() throws IOException, InterruptedException{
@@ -61,6 +63,19 @@ public class ServerHelper extends Thread{
                 {
                     handleJoin(words);
                 }
+                else if(clientCommand.equalsIgnoreCase("reg")){
+                    //registration only allows 3 fields: the command: "reg"
+                    //the username, and the password. More than three fields is an invalid registration.
+                    if(words.length == 3)
+                    {
+                        String username = words[1];
+                        String password = words[2];
+                        handleRegister(username, password);//need to verify this.
+                    }
+                    else {
+                        outputStream.write("Error registering\n".getBytes());
+                    }
+                }
                 else if(clientCommand.equalsIgnoreCase("leave")){
                     handleLeave(words);
                 }
@@ -74,6 +89,21 @@ public class ServerHelper extends Thread{
         }
 
         clientSocket.close();
+    }
+
+    private void handleRegister(String username, String password) throws IOException {
+        accountManager = server.getAccountManager();
+        if(!accountManager.addAccount(username,password))
+        {
+            outputStream.write(("Error, the username is invalid or already taken" + "\n").getBytes());
+            System.out.println("Error registering connection with attempted username: " + username);
+        }
+        else//update servers registered users
+        {
+            server.updateManager(accountManager);
+            System.out.println("User: " + username + " added to the registry.");
+        }
+
     }
 
     private void handleGroupMessage(String[] messagewords) throws IOException {
@@ -157,11 +187,15 @@ public class ServerHelper extends Thread{
         clientSocket.close();
     }
 
+
     private void handleLogin(OutputStream outputStream, String[] words) throws IOException {
+
         if(words.length == 3) {
+            accountManager = server.getAccountManager();
             String new_login = words[1];
             String password = words[2];
-            if((new_login.equals("guest") && password.equals("guest")) || new_login.equals("curtis") && password.equals("curtis"))
+            //if((new_login.equals("guest") && password.equals("guest")) || new_login.equals("curtis") && password.equals("curtis"))
+            if(accountManager.isValidLogin(new_login, password))
             {
                 String msg = "You are logged in.\n";
                 outputStream.write(msg.getBytes());
