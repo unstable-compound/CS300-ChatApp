@@ -4,17 +4,21 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
-public class AccountManager {
-    private FileOutputStream fileOutputStream;
-    private FileInputStream fileInputStream;
-    private ObjectInputStream objectInputStream;
-    private ObjectOutputStream objectOutputStream;
+public class AccountManager implements Serializable{
+    private static FileOutputStream fileOutputStream;
+    private static FileInputStream fileInputStream;
+    private static ObjectInputStream objectInputStream;
+    private static ObjectOutputStream objectOutputStream;
     private String fileName = "Accounts.txt";
     private ArrayList<Account> accounts = new ArrayList<>();
 
-    private class Account {
-        private String username = null;
-        private String password = null;
+    private class Account implements Serializable {
+        private String username = new String();
+        private String password = new String();
+        public Account(){
+            username = null;
+            password = null;
+        }
 
         public Account(String loginName, String password) {
             this.username = loginName;
@@ -63,13 +67,23 @@ public class AccountManager {
 
         int length = accounts.size();
         try {
-            fileOutputStream = new FileOutputStream(fileName);
+            fileOutputStream = new FileOutputStream(new File(fileName));
+            //
+            //FileWriter fileWriter = new FileWriter(fileName);
+            //
             objectOutputStream = new ObjectOutputStream(fileOutputStream);
-            for (int i = 0; i < length; ++i) {
-                objectOutputStream.writeObject(accounts.get(i));
+           // for (int i = 0; i < length; ++i) {
 
-            }
+
+                objectOutputStream.writeObject(accounts);
+
+
+
+
+                //}
             success = true;
+            fileOutputStream.close();
+            objectOutputStream.close();
 
         } catch (FileNotFoundException e) {
             System.out.println("File not found");
@@ -77,6 +91,32 @@ public class AccountManager {
         } catch (IOException e) {
             System.out.println("Error initializing stream");
             success = false;
+        }
+        return success;
+    }
+    public boolean readFromFile() {
+        boolean success = false;
+        Account to_add;
+        try {
+            fileInputStream = new FileInputStream(fileName);
+            objectInputStream = new ObjectInputStream(fileInputStream);
+           // while ((to_add = (Account) objectInputStream.readObject()) != null) {
+            //    accounts.add(to_add);
+            //    success = true;
+           // }
+
+           // accounts = new ArrayList<>();
+            accounts.addAll((ArrayList<Account>)objectInputStream.readObject());
+
+
+            success = true;
+
+
+            fileInputStream.close();
+            objectInputStream.close();
+        } catch (ClassNotFoundException | IOException e) {
+            e.printStackTrace();
+
         }
         return success;
     }
@@ -95,6 +135,15 @@ public class AccountManager {
 			f.close();
 			*/
      public static void main(String []args){
+         AccountManager manager = new AccountManager();
+         manager.addAccount("culewis", "CurtisL");
+         manager.writeToFile();
+
+         AccountManager manager1 = new AccountManager();
+         boolean success = manager1.readFromFile();
+
+
+         success = success;
 
      }
 }

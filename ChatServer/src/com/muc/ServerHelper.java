@@ -45,6 +45,12 @@ public class ServerHelper extends Thread{
                 else if(clientCommand.equalsIgnoreCase("login")) {
                     handleLogin(outputStream, words);
                 }
+                else if(clientCommand.equalsIgnoreCase("all"))//message all
+                {
+                    String [] messageWords = StringUtils.split(currentLine, null, 2);
+                    //words[0] = all, words[1] = messagebody
+                    handleGroupMessage(messageWords);
+                }
                 else if(clientCommand.equalsIgnoreCase("msg")){
                     //instead of seperating all by whitespace, only seperate the first and second whitespace.
                     //That way, you have words[0] = 'command', words[1] = 'target_user', and words[2] = 'msg_body'.
@@ -70,6 +76,23 @@ public class ServerHelper extends Thread{
         clientSocket.close();
     }
 
+    private void handleGroupMessage(String[] messagewords) throws IOException {
+        List<ServerHelper> helperList = server.getHelperList();
+        String sendTo ="Group Chat";
+        String body = new String();
+        StringBuilder bodybuilder = new StringBuilder(body);
+        for (int i = 1; i< messagewords.length; ++i){
+            bodybuilder.append(messagewords[i] + " ");
+        }
+        body = bodybuilder.toString();
+
+
+        for (ServerHelper helper: helperList) {
+            String outMsg = sendTo + " " + login + "  " + body + "\n";
+            helper.send(outMsg);
+        }
+    }
+
     private void handleLeave(String[] words) {
         if(words.length > 1)
         {
@@ -91,6 +114,7 @@ public class ServerHelper extends Thread{
 
         }
     }
+
 
     //format_1: "msg" "login" body.....
     //format_2: "msg" "#topic" body...

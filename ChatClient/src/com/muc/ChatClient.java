@@ -48,7 +48,7 @@ public class ChatClient {
         }
         else{
             System.out.println("Connection Successful");
-            if(client.login("guest", "guest")){
+           /* if(client.login("guest", "guest")){
                 System.out.println("Login successful");
 
                 client.msg("curtis" , "Hello World!");
@@ -56,11 +56,16 @@ public class ChatClient {
                 System.err.println("Login Failed");
             }
             //client.logoff();
+            */
         }
     }
 
     public void msg(String sendTo, String message) throws IOException {
         String command = "msg " + sendTo + " " + message + "\n";
+        serverOut.write(command.getBytes());
+    }
+    public void messageAll(String message) throws IOException {
+        String command = "all" + message + "\n";
         serverOut.write(command.getBytes());
     }
 
