@@ -1,8 +1,9 @@
+package com.muc;
+
 import java.io.*;
 import java.net.Socket;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -12,6 +13,8 @@ public class ServerHelper extends Thread{
     private final Server server;
     private OutputStream outputStream;
     private HashSet<String> topicSet = new HashSet<>();
+
+    //private com.muc.AccountManager accountManager = new com.muc.AccountManager();
 
     public String getLogin() {
         return login;

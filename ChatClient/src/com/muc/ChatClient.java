@@ -1,3 +1,5 @@
+package com.muc;
+
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
@@ -57,18 +59,18 @@ public class ChatClient {
         }
     }
 
-    private void msg(String sendTo, String message) throws IOException {
+    public void msg(String sendTo, String message) throws IOException {
         String command = "msg " + sendTo + " " + message + "\n";
         serverOut.write(command.getBytes());
     }
 
-    private void logoff() throws IOException {
+    public void logoff() throws IOException {
         String cmd = "logoff \n";
         serverOut.write(cmd.getBytes());
 
     }
 
-    private boolean login(String login, String password) throws IOException {
+    public boolean login(String login, String password) throws IOException {
         String cmd = "login " + login + " " + password + "\n";
         serverOut.write(cmd.getBytes());
 
@@ -156,7 +158,7 @@ public class ChatClient {
         }
     }
 
-    private boolean connect() {
+    public boolean connect() {
         try {
             this.socket = new Socket(serverName, serverPort);
             System.out.println("Client port is: " + socket.getLocalPort());
