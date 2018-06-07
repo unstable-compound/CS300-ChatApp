@@ -162,6 +162,25 @@ public class ChatClient {
             listener.online(login);
         }
     }
+    public boolean register(String login, String password) throws IOException {
+        boolean success = false;
+        String cmd = "reg " + login + " " + password + "\n";
+        serverOut.write(cmd.getBytes());
+
+        String response = bufferedIn.readLine();
+        System.out.println("Response Line: " + response);
+
+        if(response.equalsIgnoreCase("success"))
+        {
+            success = true;
+
+        }
+        return success;
+
+        //
+        //
+
+    }
 
     public boolean connect() {
         try {

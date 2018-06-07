@@ -95,12 +95,13 @@ public class ServerHelper extends Thread{
         accountManager = server.getAccountManager();
         if(!accountManager.addAccount(username,password))
         {
-            outputStream.write(("Error, the username is invalid or already taken" + "\n").getBytes());
+            outputStream.write(("Error" + "\n").getBytes());
             System.out.println("Error registering connection with attempted username: " + username);
         }
         else//update servers registered users
         {
             server.updateManager(accountManager);
+            outputStream.write("success\n".getBytes());
             System.out.println("User: " + username + " added to the registry.");
         }
 

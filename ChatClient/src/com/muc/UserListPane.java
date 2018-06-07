@@ -2,6 +2,8 @@ package com.muc;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -10,10 +12,13 @@ public class UserListPane extends JPanel implements UserStatusListener {
 
     private final ChatClient client;
     private JList<String> userListUI;
+    private String login;
     private DefaultListModel<String> userListModel;
+    private JButton logoutButton = new JButton("Logout");
 
 
-    public UserListPane(ChatClient client) {
+    public UserListPane(ChatClient client, String login) {
+        this.login = login;
         this.client = client;
         this.client.addUserStatusListener(this);
 
@@ -22,14 +27,25 @@ public class UserListPane extends JPanel implements UserStatusListener {
         setLayout(new BorderLayout());
         add(new JScrollPane(userListUI), BorderLayout.CENTER);
 
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+        buttonPanel.add(logoutButton);
+        add(buttonPanel, BorderLayout.SOUTH);
+        logoutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                doLogout();
+            }
+        });
+
         userListUI.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseClicked(MouseEvent e) {
                 if(e.getClickCount() > 1){
-                    String login = userListUI.getSelectedValue();
-                    MessagePane messagePane = new MessagePane(client, login);
+                    String target_login = userListUI.getSelectedValue();
+                    MessagePane messagePane = new MessagePane(client, target_login);
 
-                    JFrame f = new JFrame("Message: " + login);
+                    JFrame f = new JFrame("Logged In As: " + login + "\tMessaging user: " + target_login);
                     f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                     f.setSize(500,500);
                     f.getContentPane().add(messagePane,BorderLayout.CENTER);
@@ -42,7 +58,17 @@ public class UserListPane extends JPanel implements UserStatusListener {
 
     }
 
-    public static void main(String [] args){
+    private void doLogout() {
+        try {
+            setVisible(false);
+            client.logoff();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+   /* public static void main(String [] args){
         ChatClient client = new ChatClient("localhost", 8801);
 
         UserListPane userListPane = new UserListPane(client);
@@ -65,7 +91,7 @@ public class UserListPane extends JPanel implements UserStatusListener {
         }
 
     }
-
+*/
     @Override
     public void online(String login) {
         userListModel.addElement(login);

@@ -19,7 +19,7 @@ public class Server extends Thread {
 
     public Server(int serverPort) {
         this.serverPort = serverPort;
-        this.accountManager.readFromFile();
+        //this.accountManager.readFromFile();
     }
     public List<ServerHelper> getHelperList(){
         return helperList;
@@ -52,6 +52,6 @@ public class Server extends Thread {
 
     public void updateManager(AccountManager accountManager) {
         this.accountManager = accountManager;
-        this.accountManager.writeToFile();
+        //this.accountManager.writeToFile();
     }
 }

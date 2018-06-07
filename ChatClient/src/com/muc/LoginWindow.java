@@ -11,6 +11,8 @@ public class LoginWindow extends JFrame {
     JTextField loginField = new JTextField();
     JPasswordField passwordField = new JPasswordField();
     JButton loginButton = new JButton("Login: ");
+    JButton registerButton = new JButton("Register");
+    //JDialog dialog = new JDialog();
 
 
     public LoginWindow() {
@@ -26,11 +28,19 @@ public class LoginWindow extends JFrame {
         panel.add(loginField);
         panel.add(passwordField);
         panel.add(loginButton);
+        panel.add(registerButton);
+        //panel.add(dialog);
 
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 doLogin();
+            }
+        });
+        registerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                doRegister();
             }
         });
 
@@ -42,6 +52,24 @@ public class LoginWindow extends JFrame {
 
     }
 
+    private void doRegister() {
+        String login = loginField.getText();
+        String password = passwordField.getText();
+
+        try {
+            if(client.register(login, password)) {
+
+                JOptionPane.showMessageDialog(this, "Successfully Registered.\nYou can login now.");
+            }else //tell user of the error
+            {
+                JOptionPane.showMessageDialog(this, "Error.\n Try a different username.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void doLogin() {
         String login = loginField.getText();
         String password = passwordField.getText();
@@ -49,10 +77,15 @@ public class LoginWindow extends JFrame {
         try {
             if (client.login(login, password)) {
                 //pull up user list menu
-                UserListPane userListPane = new UserListPane(client);
+                UserListPane userListPane = new UserListPane(client, login);
                 JFrame frame = new JFrame("User List");
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setSize(400, 600);
+
+                //
+                frame.add(new JLabel("Logged In As: " + login), BorderLayout.NORTH);
+                //
+
 
                 frame.getContentPane().add(userListPane, BorderLayout.CENTER);
                 frame.setVisible(true);
