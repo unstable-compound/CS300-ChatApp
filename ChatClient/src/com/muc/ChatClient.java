@@ -65,7 +65,7 @@ public class ChatClient {
         serverOut.write(command.getBytes());
     }
     public void messageAll(String message) throws IOException {
-        String command = "all" + message + "\n";
+        String command = "all " + message + "\n";
         serverOut.write(command.getBytes());
     }
 
@@ -125,7 +125,10 @@ public class ChatClient {
                         String [] messageWords = StringUtils.split(currentLine, null, 3);
                         handleMessage(messageWords);
                     }
-
+                    else if("all".equalsIgnoreCase(clientCommand)){
+                        String [] messageWords = StringUtils.split(currentLine, null, 3);
+                        handleGroupMessage(messageWords);
+                    }
                 }
             }
         }catch (Exception ex) {
@@ -135,6 +138,15 @@ public class ChatClient {
             }catch(IOException e){
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void handleGroupMessage(String[] messageWords) {
+        String loginFrom = messageWords[1];
+        String message = messageWords[2];
+
+        for(MessageListener listener: messageListeners){
+            listener.onMessage(loginFrom, message);
         }
     }
 

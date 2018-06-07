@@ -109,7 +109,7 @@ public class ServerHelper extends Thread{
 
     private void handleGroupMessage(String[] messagewords) throws IOException {
         List<ServerHelper> helperList = server.getHelperList();
-        String sendTo ="Group Chat";
+        String command ="all";
         String body = new String();
         StringBuilder bodybuilder = new StringBuilder(body);
         for (int i = 1; i< messagewords.length; ++i){
@@ -118,9 +118,11 @@ public class ServerHelper extends Thread{
         body = bodybuilder.toString();
 
 
-        for (ServerHelper helper: helperList) {
-            String outMsg = sendTo + " " + login + "  " + body + "\n";
-            helper.send(outMsg);
+        for(int i = 0; i< helperList.size(); ++i) {
+            String outMsg = command + " " + login + "  " + body + "\n";
+            if(!helperList.get(i).login.equals(this.login)) {
+                helperList.get(i).send(outMsg);
+            }
         }
     }
 

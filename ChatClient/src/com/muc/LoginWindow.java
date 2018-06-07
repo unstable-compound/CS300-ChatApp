@@ -78,18 +78,28 @@ public class LoginWindow extends JFrame {
             if (client.login(login, password)) {
                 //pull up user list menu
                 UserListPane userListPane = new UserListPane(client, login);
-                JFrame frame = new JFrame("User List");
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.setSize(400, 600);
+                JFrame userList = new JFrame("User List");
+                userList.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                userList.setSize(400, 600);
 
                 //
-                frame.add(new JLabel("Logged In As: " + login), BorderLayout.NORTH);
+                userList.add(new JLabel("Logged In As: " + login), BorderLayout.NORTH);
                 //
 
 
-                frame.getContentPane().add(userListPane, BorderLayout.CENTER);
-                frame.setVisible(true);
+                userList.getContentPane().add(userListPane, BorderLayout.CENTER);
+                userList.setVisible(true);
                 setVisible(false);
+
+                //Open up group chat box.
+                GroupChatPane groupChatPane = new GroupChatPane(client, login);
+                JFrame groupBox = new JFrame("Logged In As: " + login + "\nGroup Chat");
+                groupBox.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                groupBox.setSize(500,500);
+                groupBox.getContentPane().add(groupChatPane, BorderLayout.CENTER);
+                groupBox.setVisible(true);
+
+
             } else {
                 //show error message
                 JOptionPane.showMessageDialog(this, "Invalid login/password.");

@@ -6,8 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
-public class MessagePane extends JPanel implements MessageListener {
-
+public class GroupChatPane extends JPanel implements MessageListener {
     private final ChatClient client;
     private final String login;
 
@@ -15,9 +14,9 @@ public class MessagePane extends JPanel implements MessageListener {
     private JList<String> messagelist = new JList<>(listModel);
     private JTextField inputField = new JTextField();
 
-    public MessagePane(ChatClient client, String targetLogin) {
+    public GroupChatPane(ChatClient client, String login) {
         this.client = client;
-        this.login = targetLogin;
+        this.login = login;
 
         client.addMessageListener(this);
 
@@ -28,10 +27,10 @@ public class MessagePane extends JPanel implements MessageListener {
         inputField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                String message = inputField.getText();
                 try {
-                    String text = inputField.getText();
-                    client.msg(targetLogin, text);
-                    listModel.addElement("You: " + text);
+                    client.messageAll(message);
+                    listModel.addElement("You: " + message);
                     inputField.setText("");
                 } catch (IOException e1) {
                     e1.printStackTrace();
@@ -40,13 +39,15 @@ public class MessagePane extends JPanel implements MessageListener {
         });
     }
 
+
     @Override
     public void onMessage(String fromLogin, String message) {
-        if(login.equalsIgnoreCase(fromLogin)) {
-
-
+        if(!login.equals(fromLogin))
+        {
             String line = fromLogin + ": " + message;
             listModel.addElement(line);
         }
+
     }
 }
+
